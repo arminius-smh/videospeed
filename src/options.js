@@ -160,12 +160,12 @@ function save_options() {
 			return arr;
 		}
 	});
-	chrome.storage.sync.set(settings_values, () => updateStatus("Options saved"));
+	chrome.storage.local.set(settings_values, () => updateStatus("Options saved"));
 }
 
 // Takes values from chrome.storage and inserts them into the document
 function restore_options() {
-	chrome.storage.sync.get(settings_defaults, (storage) => {
+	chrome.storage.local.get(settings_defaults, (storage) => {
 		Object.keys(storage).forEach((key) => {
 			if (settings[key].type === "b") {
 				document.getElementById(key).checked = storage[key];
@@ -214,8 +214,8 @@ function restore_options() {
 }
 
 function restore_defaults() {
-	chrome.storage.sync.clear();
-	chrome.storage.sync.set(settings_defaults, () => {
+	chrome.storage.local.clear();
+	chrome.storage.local.set(settings_defaults, () => {
 		restore_options();
 		// Remove buttons for non-default keybinds
 		document
