@@ -54,7 +54,7 @@ chrome.storage.onChanged.addListener((callback) => {
 	})
 })
 
-chrome.storage.sync.get(cached_settings, (storage) => {
+chrome.storage.local.get(cached_settings, (storage) => {
 	cached_settings = storage
 	initializeWhenReady(document)
 })
@@ -347,7 +347,7 @@ function setupListener() {
 		if (cached_settings.rememberSpeed || cached_settings.forceVideospeed) {
 			cached_settings.lastSpeed = speed
 			log("Syncing chrome settings for lastSpeed", 5)
-			chrome.storage.sync.set({ lastSpeed: speed }, function () {
+			chrome.storage.local.set({ lastSpeed: speed }, function () {
 				log("Speed setting saved: " + speed, 5)
 			})
 		}

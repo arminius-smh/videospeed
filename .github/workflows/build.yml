@@ -1,0 +1,58 @@
+name: "Build"
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+
+jobs:
+  build:
+    name: "Build"
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Checkout"
+        uses: actions/checkout@v4
+
+      - name: "web-ext build"
+        id: web-ext-build
+        uses: kewisch/action-web-ext@v1
+        with:
+          cmd: build
+          source: src
+          filename: "{name}-{version}.xpi"
+          ignoreFiles: '[ "package.json","package-lock.json","yarn.lock" ]'
+
+      - name: "Upload Artifact"
+        uses: actions/upload-artifact@v4
+        with:
+          name: target.xpi
+          path: ${{ steps.web-ext-build.outputs.target }}
+  release:
+    name: "Create Release"
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Checkout"
+        uses: actions/checkout@v4
+
+      - name: "Download Artifact"
+        uses: actions/download-artifact@v4
+        with:
+          name: target.xpi
+          path: .
+
+      - name: "Get Version from Package"
+        id: version
+        run: echo "VERSION=$(jq -r .version src/manifest.json)" >> $GITHUB_ENV
+
+      - name: "Create GitHub Release"
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ env.VERSION }}
+          name: "Release v${{ env.VERSION }}"
+          body: "Automated release of version ${{ env.VERSION }}"
+          draft: false
+          prerelease: false
+          files: target.xpi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
